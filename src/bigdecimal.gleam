@@ -32,6 +32,10 @@ pub fn absolute(value: BigDecimal) -> BigDecimal {
   BigDecimal(bigi.absolute(unscaled_value(value)), scale(value))
 }
 
+pub fn negate(value: BigDecimal) -> BigDecimal {
+  BigDecimal(bigi.negate(unscaled_value(value)), scale(value))
+}
+
 pub fn compare(this: BigDecimal, with that: BigDecimal) -> order.Order {
   case scale(this) == scale(that) {
     True -> bigi.compare(unscaled_value(this), unscaled_value(that))
