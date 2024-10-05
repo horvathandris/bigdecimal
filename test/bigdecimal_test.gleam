@@ -68,6 +68,44 @@ pub fn negation__test() {
   |> should.equal(expected)
 }
 
+pub fn addition__test() {
+  use #(augend, addend, result) <- list.each([
+    // same scale
+    #(
+      bigdecimal.from_float(1.23),
+      bigdecimal.from_float(1.23),
+      bigdecimal.from_float(2.46),
+    ),
+    #(
+      bigdecimal.from_string("-7.89E9") |> should.be_ok,
+      bigdecimal.from_string("7.89E9") |> should.be_ok,
+      bigdecimal.from_string("0e7") |> should.be_ok,
+    ),
+  ])
+
+  bigdecimal.add(augend, addend)
+  |> should.equal(result)
+}
+
+pub fn subtraction__test() {
+  use #(minuend, subtrahend, result) <- list.each([
+    // same scale
+    #(
+      bigdecimal.from_float(1.23),
+      bigdecimal.from_float(1.23),
+      bigdecimal.from_string("0.00") |> should.be_ok,
+    ),
+    #(
+      bigdecimal.from_string("-7.89E9") |> should.be_ok,
+      bigdecimal.from_string("7.89E9") |> should.be_ok,
+      bigdecimal.from_string("-15.78e9") |> should.be_ok,
+    ),
+  ])
+
+  bigdecimal.subtract(minuend, subtrahend)
+  |> should.equal(result)
+}
+
 pub fn basic_parse__test() {
   use #(input, expected_unscaled_value, expected_scale) <- list.each([
     // basic

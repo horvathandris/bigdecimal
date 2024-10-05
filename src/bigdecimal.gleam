@@ -36,6 +36,30 @@ pub fn negate(value: BigDecimal) -> BigDecimal {
   BigDecimal(bigi.negate(unscaled_value(value)), scale(value))
 }
 
+pub fn add(augend: BigDecimal, addend: BigDecimal) -> BigDecimal {
+  case int.compare(scale(augend), scale(addend)) {
+    order.Eq ->
+      BigDecimal(
+        bigi.add(unscaled_value(augend), unscaled_value(addend)),
+        scale(augend),
+      )
+    order.Lt -> BigDecimal(todo, scale(addend))
+    order.Gt -> BigDecimal(todo, scale(augend))
+  }
+}
+
+pub fn subtract(minuend: BigDecimal, subtrahend: BigDecimal) -> BigDecimal {
+  case int.compare(scale(minuend), scale(subtrahend)) {
+    order.Eq ->
+      BigDecimal(
+        bigi.subtract(unscaled_value(minuend), unscaled_value(subtrahend)),
+        scale(minuend),
+      )
+    order.Lt -> BigDecimal(todo, scale(subtrahend))
+    order.Gt -> BigDecimal(todo, scale(minuend))
+  }
+}
+
 pub fn compare(this: BigDecimal, with that: BigDecimal) -> order.Order {
   case scale(this) == scale(that) {
     True -> bigi.compare(unscaled_value(this), unscaled_value(that))
