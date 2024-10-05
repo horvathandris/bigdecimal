@@ -1,5 +1,7 @@
 import bigi.{type BigInt}
+import gleam/float
 import gleam/int
+import gleam/order
 import gleam/result
 import gleam/string
 
@@ -12,14 +14,34 @@ pub opaque type BigDecimal {
   )
 }
 
-pub fn unscaled_value(value: BigDecimal) {
+pub fn unscaled_value(value: BigDecimal) -> BigInt {
   let BigDecimal(unscaled_value, ..) = value
   unscaled_value
 }
 
-pub fn scale(value: BigDecimal) {
+pub fn scale(value: BigDecimal) -> Int {
   let BigDecimal(_, scale, ..) = value
   scale
+}
+
+pub fn zero() -> BigDecimal {
+  BigDecimal(bigi.from_int(0), 0)
+}
+
+pub fn compare(this: BigDecimal, with that: BigDecimal) -> order.Order {
+  case scale(this) == scale(that) {
+    True -> bigi.compare(unscaled_value(this), unscaled_value(that))
+    False -> todo
+  }
+}
+
+pub fn from_float(value: Float) -> BigDecimal {
+  // TODO: this works fine but idk if it could be better/quicker
+  let assert Ok(bigd) =
+    float.to_string(value)
+    |> from_string
+
+  bigd
 }
 
 pub fn from_string(value: String) -> Result(BigDecimal, Nil) {

@@ -1,5 +1,5 @@
 name = "bigdecimal"
-version = "0.1.0"
+version = "1.0.0"
 
 description = "Arbitrary precision decimal arithmetic for Gleam"
 licences = ["Apache-2.0"]
