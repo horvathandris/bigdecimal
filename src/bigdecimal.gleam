@@ -50,20 +50,6 @@ pub fn add(augend: BigDecimal, addend: BigDecimal) -> BigDecimal {
   }
 }
 
-fn scale_adjusted_add(
-  to_scale: BigDecimal,
-  to_add: BigDecimal,
-  scale_difference: Int,
-) -> BigDecimal {
-  let assert Ok(new_unscaled_value) =
-    int.absolute_value(scale_difference)
-    |> bigi.from_int
-    |> bigi.power(bigi.from_int(10), _)
-    |> result.map(bigi.multiply(_, unscaled_value(to_scale)))
-    |> result.map(bigi.add(_, unscaled_value(to_add)))
-  BigDecimal(new_unscaled_value, scale(to_add))
-}
-
 pub fn subtract(minuend: BigDecimal, subtrahend: BigDecimal) -> BigDecimal {
   case int.subtract(scale(minuend), scale(subtrahend)) {
     scale_difference if scale_difference < 0 ->
@@ -78,11 +64,45 @@ pub fn subtract(minuend: BigDecimal, subtrahend: BigDecimal) -> BigDecimal {
   }
 }
 
+fn scale_adjusted_add(
+  to_scale: BigDecimal,
+  to_add: BigDecimal,
+  scale_difference: Int,
+) -> BigDecimal {
+  // TODO: wonder if this could be sped up somehow
+  let assert Ok(new_unscaled_value) =
+    int.absolute_value(scale_difference)
+    |> bigi.from_int
+    |> bigi.power(bigi.from_int(10), _)
+    |> result.map(bigi.multiply(_, unscaled_value(to_scale)))
+    |> result.map(bigi.add(_, unscaled_value(to_add)))
+  BigDecimal(new_unscaled_value, scale(to_add))
+}
+
 pub fn compare(this: BigDecimal, with that: BigDecimal) -> order.Order {
-  case scale(this) == scale(that) {
-    True -> bigi.compare(unscaled_value(this), unscaled_value(that))
-    False -> todo
+  case int.subtract(scale(this), scale(that)) {
+    scale_difference if scale_difference < 0 ->
+      scale_adjusted_compare(this, that, scale_difference)
+    scale_difference if scale_difference > 0 ->
+      scale_adjusted_compare(that, this, scale_difference)
+      |> order.negate
+    _same_scale -> bigi.compare(unscaled_value(this), unscaled_value(that))
   }
+}
+
+fn scale_adjusted_compare(
+  to_scale: BigDecimal,
+  to_compare: BigDecimal,
+  scale_difference: Int,
+) -> order.Order {
+  // TODO: wonder if this could be sped up somehow
+  let assert Ok(compare_order) =
+    int.absolute_value(scale_difference)
+    |> bigi.from_int
+    |> bigi.power(bigi.from_int(10), _)
+    |> result.map(bigi.multiply(_, unscaled_value(to_scale)))
+    |> result.map(bigi.compare(_, unscaled_value(to_compare)))
+  compare_order
 }
 
 pub fn from_float(value: Float) -> BigDecimal {

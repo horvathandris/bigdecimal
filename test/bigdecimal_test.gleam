@@ -16,6 +16,26 @@ pub fn compare__test() {
     #(bigdecimal.from_float(1.22), bigdecimal.from_float(1.23), order.Lt),
     #(bigdecimal.from_float(1.24), bigdecimal.from_float(1.23), order.Gt),
     // not same scale
+    #(
+      bigdecimal.from_string("1.2") |> should.be_ok,
+      bigdecimal.from_string("1.23") |> should.be_ok,
+      order.Lt,
+    ),
+    #(
+      bigdecimal.from_string("-1.3") |> should.be_ok,
+      bigdecimal.from_string("-1.23") |> should.be_ok,
+      order.Lt,
+    ),
+    #(
+      bigdecimal.from_string("1.23") |> should.be_ok,
+      bigdecimal.from_string("1.2") |> should.be_ok,
+      order.Gt,
+    ),
+    #(
+      bigdecimal.from_string("-1.23") |> should.be_ok,
+      bigdecimal.from_string("-1.2") |> should.be_ok,
+      order.Gt,
+    ),
   ])
 
   bigdecimal.compare(this, with: that)
