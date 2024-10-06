@@ -33,7 +33,7 @@ pub fn compare__test() {
     ),
     #(
       bigdecimal.from_string("-1.23") |> should.be_ok,
-      bigdecimal.from_string("-1.2") |> should.be_ok,
+      bigdecimal.from_string("-1.3") |> should.be_ok,
       order.Gt,
     ),
   ])
