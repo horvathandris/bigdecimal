@@ -58,9 +58,9 @@ The library supports all targets and runtimes. To do a matrix run of the test su
 - [x] sum (list input)
 - [x] signum
 - [x] ulp
+- [x] power
 - [ ] divide
 - [ ] rescale/round (with rounding modes)
-- [ ] power
 - [ ] modulo
 
 ### Post v1

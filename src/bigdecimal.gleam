@@ -15,6 +15,18 @@ pub opaque type BigDecimal {
   )
 }
 
+pub type RoundingMode {
+  /// Round towards positive infinity
+  Ceiling
+  /// Round towards negative infinity
+  Floor
+  /// Round towards zero
+  Down
+  /// Round away from zero
+  Up
+  // TODO: half-up, half-down, half-even
+}
+
 pub fn unscaled_value(of value: BigDecimal) -> BigInt {
   let BigDecimal(unscaled_value, ..) = value
   unscaled_value
@@ -54,6 +66,19 @@ pub fn ulp(of value: BigDecimal) -> BigDecimal {
 
 pub fn negate(value: BigDecimal) -> BigDecimal {
   BigDecimal(bigi.negate(unscaled_value(value)), scale(value))
+}
+
+pub fn rescale(
+  value: BigDecimal,
+  scale: Int,
+  rounding: RoundingMode,
+) -> BigDecimal {
+  case rounding {
+    Ceiling -> BigDecimal(todo, scale)
+    Floor -> BigDecimal(todo, scale)
+    Up -> BigDecimal(todo, scale)
+    Down -> BigDecimal(todo, scale)
+  }
 }
 
 pub fn add(augend: BigDecimal, addend: BigDecimal) -> BigDecimal {
@@ -149,6 +174,14 @@ pub fn product(values: List(BigDecimal)) -> BigDecimal {
   // list.reduce(over: values, with: multiply)
   // |> result.lazy_unwrap(one)
   list.fold(over: values, from: one(), with: multiply)
+}
+
+/// Returns an error if the exponent is negative.
+/// (Inherited behaviour from `bigi`)
+pub fn power(value: BigDecimal, exponent: Int) {
+  unscaled_value(value)
+  |> bigi.power(bigi.from_int(exponent))
+  |> result.map(BigDecimal(_, int.multiply(scale(value), exponent)))
 }
 
 pub fn from_float(value: Float) -> BigDecimal {

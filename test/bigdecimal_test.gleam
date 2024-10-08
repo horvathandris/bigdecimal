@@ -145,6 +145,19 @@ pub fn product__test() {
   |> should.equal(expected_product)
 }
 
+pub fn power__test() {
+  use #(input, exponent, expected_product) <- list.each([
+    #(bigd("2314.234142"), 0, Ok(bigd("1"))),
+    #(bigd("2314.234142"), 1, Ok(bigd("2314.234142"))),
+    #(bigd("1.2"), 2, Ok(bigd("1.44"))),
+    #(bigd("2.123"), 3, Ok(bigd("9.568634867"))),
+    #(bigd("0.0000"), 8, Ok(bigd("0e-32"))),
+  ])
+
+  bigdecimal.power(input, exponent)
+  |> should.equal(expected_product)
+}
+
 pub fn basic_parse__test() {
   use #(input, expected_unscaled_value, expected_scale) <- list.each([
     // basic
