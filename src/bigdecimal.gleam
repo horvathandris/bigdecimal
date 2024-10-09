@@ -45,6 +45,19 @@ pub fn one() -> BigDecimal {
   BigDecimal(bigi.from_int(1), 0)
 }
 
+/// The number of digits in the unscaled value.
+pub fn precision(of value: BigDecimal) -> Int {
+  // todo: seems kinda inefficient
+  let string_length =
+    unscaled_value(value)
+    |> bigi.to_string
+    |> string.byte_size
+  case signum(value) {
+    -1 -> string_length - 1
+    _ -> string_length
+  }
+}
+
 pub fn absolute_value(of value: BigDecimal) -> BigDecimal {
   BigDecimal(bigi.absolute(unscaled_value(value)), scale(value))
 }
@@ -131,6 +144,8 @@ fn scale_adjusted_add(
   BigDecimal(new_unscaled_value, scale(to_add))
 }
 
+/// N.B. If scale is different, trailing zeros are ignored.
+///
 pub fn compare(this: BigDecimal, with that: BigDecimal) -> order.Order {
   case int.subtract(scale(this), scale(that)) {
     scale_difference if scale_difference < 0 ->
@@ -174,6 +189,15 @@ pub fn product(values: List(BigDecimal)) -> BigDecimal {
   // list.reduce(over: values, with: multiply)
   // |> result.lazy_unwrap(one)
   list.fold(over: values, from: one(), with: multiply)
+}
+
+pub fn divide(dividend: BigDecimal, by divisor: BigDecimal) -> BigDecimal {
+  let new_scale = scale(dividend) - scale(divisor)
+  case signum(dividend), signum(divisor) {
+    _, 0 -> zero()
+    0, _ -> BigDecimal(bigi.from_int(0), new_scale)
+    _, _ -> BigDecimal(todo, new_scale)
+  }
 }
 
 /// Returns an error if the exponent is negative.

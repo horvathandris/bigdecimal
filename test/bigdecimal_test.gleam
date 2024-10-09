@@ -42,6 +42,19 @@ pub fn absolute_value__test() {
   |> should.equal(expected)
 }
 
+pub fn precision__test() {
+  use #(input, expected_precision) <- list.each([
+    #(bigd("0.000"), 1),
+    #(bigd("-1.23"), 3),
+    #(bigd("1.23"), 3),
+    #(bigd("12345.67890"), 10),
+    #(bigd("0.0000000009"), 1),
+  ])
+
+  bigdecimal.precision(of: input)
+  |> should.equal(expected_precision)
+}
+
 pub fn signum__test() {
   use #(input, expected_sign) <- list.each([
     #(bigd("0.000"), 0),
@@ -143,6 +156,18 @@ pub fn product__test() {
 
   bigdecimal.product(inputs)
   |> should.equal(expected_product)
+}
+
+pub fn division__test() {
+  use #(input, divisor, expected_quotient) <- list.each([
+    // dividend is zero
+    #(bigd("0.00"), bigd("92.71245"), bigd("0e3")),
+    // divisor is zero
+    #(bigd("92.71245"), bigd("0.000"), bigd("0")),
+  ])
+
+  bigdecimal.divide(input, by: divisor)
+  |> should.equal(expected_quotient)
 }
 
 pub fn power__test() {
