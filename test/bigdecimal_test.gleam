@@ -164,6 +164,9 @@ pub fn division__test() {
     #(bigd("0.00"), bigd("92.71245"), bigd("0e3")),
     // divisor is zero
     #(bigd("92.71245"), bigd("0.000"), bigd("0")),
+    // non-edge cases
+  // #(bigd("1"), bigd("2"), bigd("0.50")),
+  // #(bigd("1.00000000"), bigd("20"), bigd("0.50")),
   ])
 
   bigdecimal.divide(input, by: divisor)

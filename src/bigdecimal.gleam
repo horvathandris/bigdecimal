@@ -1,6 +1,7 @@
 import bigi.{type BigInt}
 import gleam/float
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/order
 import gleam/result
@@ -97,7 +98,7 @@ pub fn rescale(
 pub fn add(augend: BigDecimal, addend: BigDecimal) -> BigDecimal {
   case int.subtract(scale(augend), scale(addend)) {
     scale_difference if scale_difference < 0 ->
-      scale_adjusted_add(augend, addend, scale_difference)
+      scale_adjusted_add(augend, addend, -scale_difference)
     scale_difference if scale_difference > 0 ->
       scale_adjusted_add(addend, augend, scale_difference)
     _same_scale ->
@@ -118,7 +119,7 @@ pub fn sum(values: List(BigDecimal)) -> BigDecimal {
 pub fn subtract(minuend: BigDecimal, subtrahend: BigDecimal) -> BigDecimal {
   case int.subtract(scale(minuend), scale(subtrahend)) {
     scale_difference if scale_difference < 0 ->
-      scale_adjusted_add(minuend, negate(subtrahend), scale_difference)
+      scale_adjusted_add(minuend, negate(subtrahend), -scale_difference)
     scale_difference if scale_difference > 0 ->
       scale_adjusted_add(negate(subtrahend), minuend, scale_difference)
     _same_scale ->
@@ -134,14 +135,20 @@ fn scale_adjusted_add(
   to_add: BigDecimal,
   scale_difference: Int,
 ) -> BigDecimal {
-  // TODO: wonder if this could be sped up somehow
-  let assert Ok(new_unscaled_value) =
-    int.absolute_value(scale_difference)
-    |> bigi.from_int
-    |> bigi.power(bigi.from_int(10), _)
-    |> result.map(bigi.multiply(_, unscaled_value(to_scale)))
-    |> result.map(bigi.add(_, unscaled_value(to_add)))
-  BigDecimal(new_unscaled_value, scale(to_add))
+  unscaled_value(to_scale)
+  |> multiply_power_of_ten(scale_difference)
+  |> bigi.add(unscaled_value(to_add))
+  |> BigDecimal(scale(to_add))
+}
+
+fn multiply_power_of_ten(value: BigInt, n: Int) {
+  let assert True = n >= 0
+
+  bigi.from_int(10)
+  |> bigi.power(bigi.from_int(n))
+  // unreachable unwrap
+  |> result.lazy_unwrap(fn() { bigi.from_int(0) })
+  |> bigi.multiply(value)
 }
 
 /// N.B. If scale is different, trailing zeros are ignored.
@@ -196,8 +203,32 @@ pub fn divide(dividend: BigDecimal, by divisor: BigDecimal) -> BigDecimal {
   case signum(dividend), signum(divisor) {
     _, 0 -> zero()
     0, _ -> BigDecimal(bigi.from_int(0), new_scale)
-    _, _ -> BigDecimal(todo, new_scale)
+    _, _ -> divide_internal(dividend, divisor, new_scale)
   }
+}
+
+fn divide_internal(
+  dividend: BigDecimal,
+  divisor: BigDecimal,
+  preferred_scale: Int,
+) {
+  io.debug(preferred_scale)
+  let precision =
+    precision(divisor)
+    |> int.multiply(10)
+    |> int.to_float
+    |> float.divide(3.0)
+    // unreachable unwrap - divide never errors
+    |> result.lazy_unwrap(fn() { 0.0 })
+    |> float.ceiling
+    |> float.round
+    |> int.min(precision(dividend))
+    |> io.debug
+
+  bigi.divide(unscaled_value(dividend), unscaled_value(divisor))
+  |> io.debug
+
+  todo
 }
 
 /// Returns an error if the exponent is negative.
