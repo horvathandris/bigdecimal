@@ -98,32 +98,34 @@ fn rescale_with_rounding(
   scale_diff: Int,
   rounding: RoundingMode,
 ) {
-  let power_of_ten = multiply_power_of_ten(bigi.from_int(1), scale_diff)
+  let tens = multiply_power_of_ten(bigi.from_int(1), scale_diff)
+  let unscaled = unscaled_value(value)
+  let quotient = bigi.divide(unscaled, tens)
 
   let adjustment = case rounding, signum(value) {
     Floor, s if s < 0 -> bigi.from_int(-1)
     Ceiling, s if s > 0 -> bigi.from_int(1)
     Up, s -> bigi.from_int(s)
     HalfUp, s | HalfDown, s | HalfEven, s if s != 0 ->
-      calculate_adjustment_for_half_round(value, s, power_of_ten, rounding)
+      calculate_adjustment_for_half_round(unscaled, s, quotient, tens, rounding)
     _, _ -> bigi.zero()
   }
 
-  unscaled_value(value)
-  |> bigi.divide(power_of_ten)
+  quotient
   |> bigi.add(adjustment)
   |> BigDecimal(new_scale)
 }
 
 fn calculate_adjustment_for_half_round(
-  value: BigDecimal,
+  unscaled_value: BigInt,
   sign: Int,
+  quotient: BigInt,
   power_of_ten: BigInt,
   rounding: RoundingMode,
 ) {
   let remainder =
-    unscaled_value(value)
-    |> bigi.remainder(power_of_ten)
+    bigi.multiply(quotient, power_of_ten)
+    |> bigi.subtract(unscaled_value)
     |> bigi.absolute
 
   let to_compare =
@@ -131,10 +133,24 @@ fn calculate_adjustment_for_half_round(
     |> multiply_power_of_ten(bigi.from_int(5), _)
 
   case bigi.compare(remainder, to_compare), rounding {
+    Eq, HalfEven ->
+      case is_even(quotient) {
+        True -> bigi.zero()
+        False -> bigi.from_int(sign)
+      }
     Eq, HalfUp -> bigi.from_int(sign)
-    Eq, HalfDown -> bigi.zero()
     Gt, _ -> bigi.from_int(sign)
     _, _ -> bigi.zero()
+  }
+}
+
+fn is_even(value: BigInt) {
+  case
+    bigi.modulo(value, bigi.from_int(2))
+    |> bigi.to_int
+  {
+    Ok(0) -> True
+    _ -> False
   }
 }
 

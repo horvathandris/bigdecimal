@@ -136,9 +136,15 @@ pub fn rescale__test() {
     #(bigd("1.234"), 2, rounding.HalfEven, bigd("1.23")),
     #(bigd("1.235"), 2, rounding.HalfEven, bigd("1.24")),
     #(bigd("1.236"), 2, rounding.HalfEven, bigd("1.24")),
-    #(bigd("-0.499"), 0, rounding.HalfEven, bigd("-0")),
-    #(bigd("-0.500"), 0, rounding.HalfEven, bigd("-0")),
-    #(bigd("-0.501"), 0, rounding.HalfEven, bigd("-1")),
+    #(bigd("1.224"), 2, rounding.HalfEven, bigd("1.22")),
+    #(bigd("1.225"), 2, rounding.HalfEven, bigd("1.22")),
+    #(bigd("1.226"), 2, rounding.HalfEven, bigd("1.23")),
+    #(bigd("-2.499"), 0, rounding.HalfEven, bigd("-2")),
+    #(bigd("-2.500"), 0, rounding.HalfEven, bigd("-2")),
+    #(bigd("-2.501"), 0, rounding.HalfEven, bigd("-3")),
+    #(bigd("-1.499"), 0, rounding.HalfEven, bigd("-1")),
+    #(bigd("-1.500"), 0, rounding.HalfEven, bigd("-2")),
+    #(bigd("-1.501"), 0, rounding.HalfEven, bigd("-2")),
   ])
 
   bigdecimal.rescale(input, scale: new_scale, rounding:)
