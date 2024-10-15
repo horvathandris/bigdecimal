@@ -98,20 +98,52 @@ fn rescale_with_rounding(
   scale_diff: Int,
   rounding: RoundingMode,
 ) {
+  let power_of_ten = multiply_power_of_ten(bigi.from_int(1), scale_diff)
+
   let adjustment = case rounding, signum(value) {
     Floor, s if s < 0 -> bigi.from_int(-1)
     Ceiling, s if s > 0 -> bigi.from_int(1)
     Up, s -> bigi.from_int(s)
-    HalfUp, _ | HalfDown, _ | HalfEven, _ -> {
-      todo
-    }
-    _, _ -> bigi.from_int(0)
+    HalfUp, s | HalfDown, s | HalfEven, s if s != 0 ->
+      calculate_adjustment_for_half_round(value, s, power_of_ten, rounding)
+    _, _ -> bigi.zero()
   }
 
   unscaled_value(value)
-  |> bigi.divide(multiply_power_of_ten(bigi.from_int(1), scale_diff))
+  |> bigi.divide(power_of_ten)
   |> bigi.add(adjustment)
   |> BigDecimal(new_scale)
+}
+
+fn calculate_adjustment_for_half_round(
+  value: BigDecimal,
+  sign: Int,
+  power_of_ten: BigInt,
+  rounding: RoundingMode,
+) {
+  let remainder =
+    unscaled_value(value)
+    |> bigi.remainder(power_of_ten)
+    |> bigi.absolute
+
+  let to_compare =
+    get_magnitude(remainder, 0)
+    |> multiply_power_of_ten(bigi.from_int(5), _)
+
+  case bigi.compare(remainder, to_compare), rounding {
+    Eq, HalfUp -> bigi.from_int(sign)
+    Eq, HalfDown -> bigi.zero()
+    Gt, _ -> bigi.from_int(sign)
+    _, _ -> bigi.zero()
+  }
+}
+
+fn get_magnitude(value: BigInt, magnitude: Int) {
+  let q = bigi.divide(value, bigi.from_int(10))
+  case bigi.compare(q, bigi.zero()) {
+    Lt | Gt -> get_magnitude(q, magnitude + 1)
+    Eq -> magnitude
+  }
 }
 
 pub fn add(augend: BigDecimal, addend: BigDecimal) -> BigDecimal {

@@ -100,18 +100,23 @@ pub fn rescale__test() {
     #(bigd("1"), 5, rounding.Floor, bigd("1.00000")),
     #(bigd("-0.123"), 4, rounding.Floor, bigd("-0.1230")),
     // smaller scale - Floor
+    #(bigd("0.00000"), 3, rounding.Floor, bigd("0.000")),
     #(bigd("1.987"), 2, rounding.Floor, bigd("1.98")),
     #(bigd("-1.234"), 0, rounding.Floor, bigd("-2")),
     // smaller scale - Ceiling
+    #(bigd("0.00000"), 3, rounding.Ceiling, bigd("0.000")),
     #(bigd("1.987"), 2, rounding.Ceiling, bigd("1.99")),
     #(bigd("-1.234"), 0, rounding.Ceiling, bigd("-1")),
     // smaller scale - Up
+    #(bigd("0.00000"), 3, rounding.Up, bigd("0.000")),
     #(bigd("1.234"), 2, rounding.Up, bigd("1.24")),
     #(bigd("-1.234"), 0, rounding.Up, bigd("-2")),
     // smaller scale - Down
+    #(bigd("0.00000"), 3, rounding.Down, bigd("0.000")),
     #(bigd("1.987"), 2, rounding.Down, bigd("1.98")),
     #(bigd("-1.987"), 0, rounding.Down, bigd("-1")),
     // smaller scale - HalfUp
+    #(bigd("0.00000"), 3, rounding.HalfUp, bigd("0.000")),
     #(bigd("1.234"), 2, rounding.HalfUp, bigd("1.23")),
     #(bigd("1.235"), 2, rounding.HalfUp, bigd("1.24")),
     #(bigd("1.236"), 2, rounding.HalfUp, bigd("1.24")),
@@ -119,6 +124,7 @@ pub fn rescale__test() {
     #(bigd("-1.500"), 0, rounding.HalfUp, bigd("-2")),
     #(bigd("-1.501"), 0, rounding.HalfUp, bigd("-2")),
     // smaller scale - HalfDown
+    #(bigd("0.00000"), 3, rounding.HalfDown, bigd("0.000")),
     #(bigd("1.234"), 2, rounding.HalfDown, bigd("1.23")),
     #(bigd("1.235"), 2, rounding.HalfDown, bigd("1.23")),
     #(bigd("1.236"), 2, rounding.HalfDown, bigd("1.24")),
@@ -126,6 +132,7 @@ pub fn rescale__test() {
     #(bigd("-1.500"), 0, rounding.HalfDown, bigd("-1")),
     #(bigd("-1.501"), 0, rounding.HalfDown, bigd("-2")),
     // smaller scale - HalfEven
+    #(bigd("0.00000"), 3, rounding.HalfEven, bigd("0.000")),
     #(bigd("1.234"), 2, rounding.HalfEven, bigd("1.23")),
     #(bigd("1.235"), 2, rounding.HalfEven, bigd("1.24")),
     #(bigd("1.236"), 2, rounding.HalfEven, bigd("1.24")),
