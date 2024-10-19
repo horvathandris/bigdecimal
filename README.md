@@ -60,11 +60,11 @@ The library supports all targets and runtimes. To do a matrix run of the test su
 - [x] ulp
 - [x] power
 - [x] rescale/round (with rounding modes)
+- [x] clamp
 - [ ] divide
 - [ ] modulo
 
 ### Post v1
-- [ ] clamp
 - [ ] square root
 - [ ] trim trailing zeros
 - [ ] truncate (to BigInt)

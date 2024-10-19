@@ -115,6 +115,19 @@ pub fn simple_rescale__test() {
   |> should.equal(expected)
 }
 
+pub fn clamp__test() {
+  use #(input, min, max, expected) <- list.each([
+    #(bigd("1"), bigd("0"), bigd("2"), bigd("1")),
+    #(bigd("0.000001"), bigd("0.001"), bigd("0.02"), bigd("0.001")),
+    #(bigd("-2.4"), bigd("-3.5"), bigd("-3.3"), bigd("-3.3")),
+    // no precision loss
+    #(bigd("3.00e12"), bigd("3e12"), bigd("1e13"), bigd("3.00e12")),
+  ])
+
+  bigdecimal.clamp(input, min:, max:)
+  |> should.equal(expected)
+}
+
 pub fn rescale__test() {
   use #(input, new_scale, rounding, expected) <- list.each([
     // smaller scale - Floor

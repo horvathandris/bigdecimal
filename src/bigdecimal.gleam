@@ -73,6 +73,34 @@ pub fn negate(value: BigDecimal) -> BigDecimal {
   BigDecimal(bigi.negate(unscaled_value(value)), scale(value))
 }
 
+/// N.B. if the input has equal value to either of the extremes
+/// but different precision, the larger precision will be returned
+///
+pub fn clamp(
+  value: BigDecimal,
+  min min: BigDecimal,
+  max max: BigDecimal,
+) -> BigDecimal {
+  case compare(value, min) {
+    Eq ->
+      case int.compare(scale(value), scale(min)) {
+        Eq | Gt -> value
+        Lt -> min
+      }
+    Lt -> min
+    Gt ->
+      case compare(value, max) {
+        Eq ->
+          case int.compare(scale(value), scale(max)) {
+            Eq | Lt -> value
+            Gt -> max
+          }
+        Gt -> max
+        Lt -> value
+      }
+  }
+}
+
 pub fn rescale(
   value: BigDecimal,
   scale new_scale: Int,
