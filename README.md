@@ -50,5 +50,3 @@ The library supports all targets and runtimes. To do a matrix run of the test su
 
 - [ ] remainder
 - [ ] square root
-- [ ] trim trailing zeros
-- [ ] truncate (to BigInt)

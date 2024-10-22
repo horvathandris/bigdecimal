@@ -92,6 +92,28 @@ pub fn negation__test() {
   |> should.equal(expected)
 }
 
+pub fn trim_zeros__test() {
+  use #(input, expected) <- list.each([
+    #(bigd("-1.23"), bigd("-1.23")),
+    #(bigd("-1.230000000"), bigd("-1.23")),
+    #(bigd("1000"), bigd("1000")),
+  ])
+
+  bigdecimal.trim_zeros(input)
+  |> should.equal(expected)
+}
+
+pub fn truncate_to_bigint__test() {
+  use #(input, expected) <- list.each([
+    #(bigd("-1.23"), bigi.from_int(-1)),
+    #(bigd("0.123123"), bigi.from_int(0)),
+    #(bigd("1000"), bigi.from_int(1000)),
+  ])
+
+  bigdecimal.truncate_to_bigint(input)
+  |> should.equal(expected)
+}
+
 pub fn simple_rescale__test() {
   use #(input, new_scale, expected) <- list.each([
     // same scale

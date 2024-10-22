@@ -73,6 +73,19 @@ pub fn negate(value: BigDecimal) -> BigDecimal {
   BigDecimal(bigi.negate(unscaled_value(value)), scale(value))
 }
 
+/// Trim trailing zeros from after the decimal point.
+///
+pub fn trim_zeros(value: BigDecimal) -> BigDecimal {
+  trim_zeros_to_match_scale(value, 0)
+}
+
+/// Truncate the `BigDecimal` to a `BigInt`.
+///
+pub fn truncate_to_bigint(value: BigDecimal) -> BigInt {
+  unscaled_value(value)
+  |> bigi.divide(multiply_power_of_ten(bigi.from_int(1), scale(value)))
+}
+
 /// N.B. if the input has equal value to either of the extremes
 /// but different precision, the larger precision will be returned
 ///
