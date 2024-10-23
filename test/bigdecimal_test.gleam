@@ -291,6 +291,19 @@ pub fn division__test() {
   |> should.equal(expected_quotient)
 }
 
+pub fn modulo__test() {
+  use #(input, divisor, expected_remainder) <- list.each([
+    #(bigd("13.3"), bigd("3.3"), bigd("0.1")),
+    #(bigd("-13.3"), bigd("3.3"), bigd("3.2")),
+    #(bigd("13.3"), bigd("-3.3"), bigd("-3.2")),
+    #(bigd("-13.3"), bigd("-3.3"), bigd("-0.1")),
+    // todo: add more cases
+  ])
+
+  todo as "Implement modulo function"
+  |> should.equal(expected_remainder)
+}
+
 pub fn power__test() {
   use #(input, exponent, expected_product) <- list.each([
     #(bigd("2314.234142"), 0, Ok(bigd("1"))),
