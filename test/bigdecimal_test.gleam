@@ -291,17 +291,61 @@ pub fn division__test() {
   |> should.equal(expected_quotient)
 }
 
-pub fn modulo__test() {
+pub fn remainder__test() {
   use #(input, divisor, expected_remainder) <- list.each([
-    #(bigd("13.3"), bigd("3.3"), bigd("0.1")),
-    #(bigd("-13.3"), bigd("3.3"), bigd("3.2")),
-    #(bigd("13.3"), bigd("-3.3"), bigd("-3.2")),
-    #(bigd("-13.3"), bigd("-3.3"), bigd("-0.1")),
-    // todo: add more cases
+    // basic positives
+    #(bigd("10"), bigd("3"), bigd("1")),
+    #(bigd("10"), bigd("4"), bigd("2")),
+    #(bigd("1.5"), bigd("0.5"), bigd("0.0")),
+    #(bigd("1.5"), bigd("0.2"), bigd("0.1")),
+
+    // scale mismatch (divisor scale > value scale)
+    #(bigd("1"), bigd("0.01"), bigd("0.00")),
+    #(bigd("1.23"), bigd("0.456"), bigd("0.318")),
+    #(bigd("0.5"), bigd("0.005"), bigd("0.000")),
+    #(bigd("0.5"), bigd("0.002"), bigd("0.000")),
+    #(bigd("0.5"), bigd("0.003"), bigd("0.002")),
+
+    // negative dividend (trunc toward zero is key)
+    #(bigd("-10"), bigd("3"), bigd("-1")),
+    #(bigd("-10"), bigd("4"), bigd("-2")),
+    #(bigd("-1.5"), bigd("0.5"), bigd("0.0")),
+    #(bigd("-1.5"), bigd("0.2"), bigd("-0.1")),
+
+    // negative divisor
+    #(bigd("10"), bigd("-3"), bigd("1")),
+    #(bigd("-10"), bigd("-3"), bigd("-1")),
+
+    // opposite sign fractional
+    #(bigd("1.23"), bigd("-0.456"), bigd("0.318")),
+    #(bigd("-1.23"), bigd("0.456"), bigd("-0.318")),
+
+    // a = 0
+    #(bigd("0"), bigd("5"), bigd("0")),
+    #(bigd("0"), bigd("-5"), bigd("0")),
+    #(bigd("0"), bigd("0.0001"), bigd("0.0000")),
+
+    // tiny values
+    #(bigd("0.0001"), bigd("0.0003"), bigd("0.0001")),
+    #(bigd("0.0003"), bigd("0.0001"), bigd("0.0000")),
+
+    // high precision
+    #(bigd("3.14159"), bigd("2.71828"), bigd("0.42331")),
+    #(bigd("2.71828"), bigd("3.14159"), bigd("2.71828")),
+    #(bigd("1.234567"), bigd("0.0001"), bigd("0.000067")),
+
+    // large integers
+    #(bigd("999999999999"), bigd("3"), bigd("0")),
+    #(bigd("999999999999"), bigd("7"), bigd("0")),
+    #(bigd("1000000000000000000"), bigd("0.1"), bigd("0.0")),
+
+    // tricky sign boundary cases (trunc vs floor mismatch tests)
+    #(bigd("-7"), bigd("3"), bigd("-1")),
+    #(bigd("-1.1"), bigd("0.4"), bigd("-0.3")),
+    #(bigd("1.1"), bigd("-0.4"), bigd("0.3")),
   ])
 
-  // todo as "Implement modulo function"
-  expected_remainder
+  bigdecimal.remainder(input, divisor)
   |> should.equal(expected_remainder)
 }
 

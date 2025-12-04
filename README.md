@@ -47,5 +47,4 @@ The library supports all targets and runtimes. To do a matrix run of the test su
 
 ## TODO
 
-- [ ] remainder
 - [ ] square root

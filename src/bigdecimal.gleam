@@ -429,6 +429,26 @@ fn trim_zeros_to_match_scale(value: BigDecimal, preferred_scale: Int) {
   }
 }
 
+/// Computes the **truncating remainder** of two `BigDecimal` values.
+///
+/// The sign of the result always matches the sign of `value`
+/// (the dividend), and the remainder may be negative.
+///
+/// Follows the standard Gleam divide-by-zero rule of 0 when the divisor is 0.
+///
+/// Note: This is **not** a modulo operation.
+///
+pub fn remainder(value: BigDecimal, divisor: BigDecimal) -> BigDecimal {
+  let common_scale = int.max(scale(value), scale(divisor))
+  bigi.remainder(
+    rescale(value, common_scale, Floor)
+      |> unscaled_value,
+    rescale(divisor, common_scale, Floor)
+      |> unscaled_value,
+  )
+  |> BigDecimal(common_scale)
+}
+
 /// Returns an error if the exponent is negative.
 /// (Inherited behaviour from `bigi`)
 ///
