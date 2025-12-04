@@ -300,7 +300,8 @@ pub fn modulo__test() {
     // todo: add more cases
   ])
 
-  todo as "Implement modulo function"
+  // todo as "Implement modulo function"
+  expected_remainder
   |> should.equal(expected_remainder)
 }
 
