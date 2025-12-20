@@ -53,14 +53,12 @@ pub fn absolute_value(of value: BigDecimal) -> BigDecimal {
 /// -1 if the value is negative, 0 if the value is zero.
 ///
 pub fn signum(of value: BigDecimal) -> Int {
-  value
-  |> compare_to_zero
+  compare_to_zero(value)
   |> order.to_int
 }
 
 fn compare_to_zero(value: BigDecimal) -> order.Order {
-  value
-  |> unscaled_value
+  unscaled_value(value)
   |> bigi.compare(with: bigi.zero())
 }
 
@@ -499,9 +497,8 @@ fn parse_unscaled(value: String, scale: Int) -> Result(BigDecimal, Nil) {
 }
 
 pub fn to_plain_string(value: BigDecimal) -> String {
-  let value = trim_zeros(value)
   let scale = scale(value)
-  let unscaled_abs = value |> unscaled_value |> bigi.absolute |> bigi.to_string
+  let unscaled_abs = unscaled_value(value) |> bigi.absolute |> bigi.to_string
 
   let sign = case compare_to_zero(value) {
     Lt -> "-"

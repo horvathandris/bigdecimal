@@ -497,44 +497,48 @@ fn common_assertions(
   |> should.equal(expected_scale)
 }
 
-pub fn to_plain_string_test() {
+pub fn to_plain_string__test() {
+  use input <- list.each([
+    "100",
+    "100.00",
+    "0.009",
+    "-0.009",
+    "-100",
+    "0",
+    "0.00",
+    "9.00",
+    "0.9",
+    "0.1",
+    "9.9",
+    "9.1",
+    "-9.1",
+    "-0.1",
+    "9.0001",
+    "9.0001000",
+    "9.01",
+    "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009",
+  ])
+
+  let assert Ok(bigdec) = bigdecimal.from_string(input)
+  let result = bigdecimal.to_plain_string(bigdec)
+
+  result
+  |> should.equal(input)
+
+  result
+  |> bigdecimal.from_string
+  |> should.be_ok
+  |> should.equal(bigdec)
+}
+
+pub fn to_plain_string_negative_scale__test() {
   use #(input, expected) <- list.each([
-    #(bigd("100"), "100"),
-    #(bigd("100.00"), "100"),
-    #(bigd("0.009"), "0.009"),
-    #(bigd("-0.009"), "-0.009"),
-    #(bigd("-100"), "-100"),
-    #(bigd("0"), "0"),
-    #(bigd("0.00"), "0"),
-    #(bigd("9.00"), "9"),
-    #(bigd("0.9"), "0.9"),
-    #(bigd("0.1"), "0.1"),
-    #(bigd("9.9"), "9.9"),
-    #(bigd("9.1"), "9.1"),
-    #(bigd("-9.1"), "-9.1"),
-    #(bigd("-0.1"), "-0.1"),
-    #(bigd("9.0001"), "9.0001"),
-    #(bigd("9.01"), "9.01"),
-    #(
-      bigd(
-        "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      ),
-      "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    ),
-    #(
-      bigd(
-        "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009",
-      ),
-      "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009",
-    ),
     #(bigdecimal.rescale(bigd("0"), -4, rounding.Down), "0"),
     #(bigdecimal.rescale(bigd("1000"), -3, rounding.Down), "1000"),
-    #(bigdecimal.rescale(bigd("1000"), -1, rounding.Down), "1000"),
-    #(bigdecimal.rescale(bigd("1000"), 1, rounding.Down), "1000"),
-    #(bigdecimal.rescale(bigd("1000"), 4, rounding.Down), "1000"),
+    #(bigdecimal.rescale(bigd("2000"), -1, rounding.Down), "2000"),
   ])
-  let result_string = bigdecimal.to_plain_string(input)
-  assert result_string == expected
-  let assert Ok(recreated) = bigdecimal.from_string(result_string)
-  assert bigdecimal.compare(recreated, input) == order.Eq
+
+  bigdecimal.to_plain_string(input)
+  |> should.equal(expected)
 }
