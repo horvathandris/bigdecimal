@@ -496,3 +496,49 @@ fn common_assertions(
   bigdecimal.scale(of: value)
   |> should.equal(expected_scale)
 }
+
+pub fn to_plain_string__test() {
+  use input <- list.each([
+    "100",
+    "100.00",
+    "0.009",
+    "-0.009",
+    "-100",
+    "0",
+    "0.00",
+    "9.00",
+    "0.9",
+    "0.1",
+    "9.9",
+    "9.1",
+    "-9.1",
+    "-0.1",
+    "9.0001",
+    "9.0001000",
+    "9.01",
+    "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009",
+  ])
+
+  let assert Ok(bigdec) = bigdecimal.from_string(input)
+  let result = bigdecimal.to_plain_string(bigdec)
+
+  result
+  |> should.equal(input)
+
+  result
+  |> bigdecimal.from_string
+  |> should.be_ok
+  |> should.equal(bigdec)
+}
+
+pub fn to_plain_string_negative_scale__test() {
+  use #(input, expected) <- list.each([
+    #(bigdecimal.rescale(bigd("0"), -4, rounding.Down), "0"),
+    #(bigdecimal.rescale(bigd("1000"), -3, rounding.Down), "1000"),
+    #(bigdecimal.rescale(bigd("2000"), -1, rounding.Down), "2000"),
+  ])
+
+  bigdecimal.to_plain_string(input)
+  |> should.equal(expected)
+}

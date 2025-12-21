@@ -10,21 +10,16 @@ import gleam/result
 import gleam/string
 
 pub opaque type BigDecimal {
-  BigDecimal(
-    // unscaled value
-    BigInt,
-    // scale
-    Int,
-  )
+  BigDecimal(unscaled_value: BigInt, scale: Int)
 }
 
 pub fn unscaled_value(of value: BigDecimal) -> BigInt {
-  let BigDecimal(unscaled_value, ..) = value
+  let BigDecimal(unscaled_value:, ..) = value
   unscaled_value
 }
 
 pub fn scale(of value: BigDecimal) -> Int {
-  let BigDecimal(_, scale, ..) = value
+  let BigDecimal(scale:, ..) = value
   scale
 }
 
@@ -58,9 +53,13 @@ pub fn absolute_value(of value: BigDecimal) -> BigDecimal {
 /// -1 if the value is negative, 0 if the value is zero.
 ///
 pub fn signum(of value: BigDecimal) -> Int {
+  compare_to_zero(value)
+  |> order.to_int
+}
+
+fn compare_to_zero(value: BigDecimal) -> order.Order {
   unscaled_value(value)
   |> bigi.compare(with: bigi.zero())
-  |> order.to_int
 }
 
 /// Returns the unit of least precision of this `BigDecimal`.
@@ -495,4 +494,33 @@ fn parse_decimal(value: String, initial_scale: Int) -> Result(BigDecimal, Nil) {
 fn parse_unscaled(value: String, scale: Int) -> Result(BigDecimal, Nil) {
   bigi.from_string(value)
   |> result.map(BigDecimal(_, scale))
+}
+
+pub fn to_plain_string(value: BigDecimal) -> String {
+  let scale = scale(value)
+  let unscaled_abs = unscaled_value(value) |> bigi.absolute |> bigi.to_string
+
+  let sign = case compare_to_zero(value) {
+    Lt -> "-"
+    _ -> ""
+  }
+
+  let int_end_zeros = string.repeat("0", times: -scale)
+  let int_val = string.drop_end(unscaled_abs, scale)
+  let int_part = case int_val {
+    "" | "0" -> "0"
+    _ -> int_val <> int_end_zeros
+  }
+
+  let digits = string.byte_size(unscaled_abs)
+  let frac_start_zeros = string.repeat("0", times: scale - digits)
+  let frac_digits = int.min(digits, int.max(0, scale))
+  let frac_val =
+    string.slice(unscaled_abs, at_index: -frac_digits, length: frac_digits)
+  let frac_part = case frac_val {
+    "" -> ""
+    _ -> "." <> frac_start_zeros <> frac_val
+  }
+
+  sign <> int_part <> frac_part
 }
