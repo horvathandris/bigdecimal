@@ -8,6 +8,7 @@ import gleam/list
 import gleam/order.{Eq, Gt, Lt}
 import gleam/result
 import gleam/string
+import gleam/string_tree
 
 pub opaque type BigDecimal {
   BigDecimal(unscaled_value: BigInt, scale: Int)
@@ -496,31 +497,48 @@ fn parse_unscaled(value: String, scale: Int) -> Result(BigDecimal, Nil) {
   |> result.map(BigDecimal(_, scale))
 }
 
+/// Converts a BigDecimal into a plain (non-scientific) decimal string.
+///
+/// This function returns a **lossless** string representation of the number:
+///
+/// - The number’s **scale is preserved**
+/// - Trailing zeros are **not trimmed**
+/// - The result can be parsed back to the same exact BigDecimal
+///
 pub fn to_plain_string(value: BigDecimal) -> String {
   let scale = scale(value)
   let unscaled_abs = unscaled_value(value) |> bigi.absolute |> bigi.to_string
 
-  let sign = case compare_to_zero(value) {
-    Lt -> "-"
-    _ -> ""
+  let string_builder = case compare_to_zero(value) {
+    Lt -> string_tree.from_string("-")
+    _ -> string_tree.new()
   }
 
-  let int_end_zeros = string.repeat("0", times: -scale)
-  let int_val = string.drop_end(unscaled_abs, scale)
-  let int_part = case int_val {
-    "" | "0" -> "0"
-    _ -> int_val <> int_end_zeros
+  let integer_part_end_zeros = string.repeat("0", times: -scale)
+  let integer_part_value = string.drop_end(unscaled_abs, scale)
+  let string_builder = case integer_part_value {
+    "" | "0" -> string_tree.append(string_builder, "0")
+    _ ->
+      string_tree.append(string_builder, integer_part_value)
+      |> string_tree.append(integer_part_end_zeros)
   }
 
   let digits = string.byte_size(unscaled_abs)
-  let frac_start_zeros = string.repeat("0", times: scale - digits)
-  let frac_digits = int.min(digits, int.max(0, scale))
-  let frac_val =
-    string.slice(unscaled_abs, at_index: -frac_digits, length: frac_digits)
-  let frac_part = case frac_val {
-    "" -> ""
-    _ -> "." <> frac_start_zeros <> frac_val
+  let fractional_part_start_zeros = string.repeat("0", times: scale - digits)
+  let fractional_part_digits = int.min(digits, int.max(0, scale))
+  let fractional_part_value =
+    string.slice(
+      unscaled_abs,
+      at_index: -fractional_part_digits,
+      length: fractional_part_digits,
+    )
+  let string_builder = case fractional_part_value {
+    "" -> string_builder
+    _ ->
+      string_tree.append(string_builder, ".")
+      |> string_tree.append(fractional_part_start_zeros)
+      |> string_tree.append(fractional_part_value)
   }
 
-  sign <> int_part <> frac_part
+  string_tree.to_string(string_builder)
 }
