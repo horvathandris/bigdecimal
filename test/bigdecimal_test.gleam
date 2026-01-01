@@ -351,14 +351,24 @@ pub fn remainder__test() {
 
 pub fn power__test() {
   use #(input, exponent, expected_product) <- list.each([
-    #(bigd("2314.234142"), 0, Ok(bigd("1"))),
-    #(bigd("2314.234142"), 1, Ok(bigd("2314.234142"))),
-    #(bigd("1.2"), 2, Ok(bigd("1.44"))),
-    #(bigd("2.123"), 3, Ok(bigd("9.568634867"))),
-    #(bigd("0.0000"), 8, Ok(bigd("0e-32"))),
+    // zero exponent
+    #(bigd("2314.234142"), 0, bigd("1")),
+    #(bigd("0.0"), 0, bigd("1")),
+
+    // positive exponent
+    #(bigd("2314.234142"), 1, bigd("2314.234142")),
+    #(bigd("1.2"), 2, bigd("1.44")),
+    #(bigd("2.123"), 3, bigd("9.568634867")),
+    #(bigd("0.0000"), 8, bigd("0e-32")),
+
+    // negative exponent
+    #(bigd("2.123"), -3, bigd("0.10450811572388113782960592930314393")),
+    #(bigd("-1.234"), -2, bigd("0.6567040287478755624670006")),
+    #(bigd("1.234"), -3, bigd("0.53217506381513416731523551260568821")),
+    #(bigd("0.0000"), -8, bigd("0")),
   ])
 
-  bigdecimal.power(input, exponent)
+  bigdecimal.power(input, of: exponent)
   |> should.equal(expected_product)
 }
 
