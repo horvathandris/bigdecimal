@@ -449,13 +449,22 @@ pub fn remainder(value: BigDecimal, divisor: BigDecimal) -> BigDecimal {
   |> BigDecimal(common_scale)
 }
 
-/// Returns an error if the exponent is negative.
-/// (Inherited behaviour from `bigi`)
+/// Compute the value of a BigDecimal raised to the power of an exponent.
 ///
-pub fn power(value: BigDecimal, exponent: Int) {
-  unscaled_value(value)
-  |> bigi.power(bigi.from_int(exponent))
-  |> result.map(BigDecimal(_, int.multiply(scale(value), exponent)))
+/// Follows the standard Gleam divide-by-zero rule of 0 when the exponent is negative.
+///
+pub fn power(value: BigDecimal, of exponent: Int) -> BigDecimal {
+  let absolute_exponent = int.absolute_value(exponent)
+  let result =
+    unscaled_value(value)
+    |> bigi.power(bigi.from_int(absolute_exponent))
+    |> result.lazy_unwrap(bigi.one)
+    |> BigDecimal(int.multiply(scale(value), absolute_exponent))
+
+  case int.compare(exponent, 0) {
+    order.Lt -> divide(one(), by: result, rounding: HalfEven)
+    _ -> result
+  }
 }
 
 pub fn from_float(value: Float) -> BigDecimal {
